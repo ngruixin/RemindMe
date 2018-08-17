@@ -97,14 +97,18 @@
 
 .sidenav {
   background-color: #f1f1f1;
-  height: 250px;
   position: fixed;
   border-radius: 20px;
   padding-top:1%;
-  top: 110px;
+  top: 10%;
 }
 
 .list-container {
   margin-top: 2%;
 
 }
+
+.table-sortable tbody tr {
+    cursor: move;
+}
+

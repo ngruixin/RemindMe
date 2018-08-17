@@ -5,6 +5,9 @@ $(document).ready(function() {
 	
 	$("#register").click(register);
 	$("#login").click(login)
+	$("#save").click(save)
+	$('#start').datepicker();
+	$('#end').datepicker();
 	
 });
 
@@ -27,6 +30,16 @@ function login() {
 	var post_data = JSON.stringify({"username": username, "password": password});
 	if (post(post_data)) window.location = "reminder.html"; 
 	else alert("Login failed, please try again.")
+}
+
+function save() {
+	//run through each row
+	var name = $('#name').val();
+    console.log(name);
+    $('tr.item').each(function () {
+        var name = $(this).find('input.name').val();
+        console.log(name);
+    });
 }
 
 function post(post_data) {
