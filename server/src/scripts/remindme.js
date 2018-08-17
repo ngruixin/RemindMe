@@ -21,16 +21,14 @@ function register() {
 		return;
 	}
 	var post_data = JSON.stringify({"username": username, "password": password});
-	if (post("register.html", post_data)) window.location = "login.html"; 
-	else alert("Registration failed, please try again.")
+	post("register.html", post_data, "Registration failed, please try again.") 
 }
 
 function login() {
 	var username = $("#username").val();
 	var password = $("#password").val();
 	var post_data = JSON.stringify({"username": username, "password": password});
-	if (post("login.html", post_data)) window.location = "reminder.html"; 
-	else alert("Login failed, please try again.")
+	post("login.html", post_data, "Login failed, please try again.")
 }
 
 function save() {
@@ -43,7 +41,7 @@ function save() {
     });
 }
 
-function post(uri, post_data) {
+function post(uri, post_data, failure_msg) {
 	console.log(post_data);
 	console.log(HOST + uri);
 	$.ajax({
@@ -54,14 +52,12 @@ function post(uri, post_data) {
 		data: post_data,
 		success: function( data, textStatus, jQxhr ){
 	        $('#response pre').html( JSON.stringify( data ) );
-	        return true;
+	        window.location = "reminder.html"; 
 	    },
 	    error: function( jqXhr, textStatus, errorThrown ){
 	        console.log( errorThrown );
-	        return false;
 	    }
 	})
-	return true;
 	//return false; #TODO SHOULD RETURN FALSE
 }
 

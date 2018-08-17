@@ -6,6 +6,8 @@ import datetime as dt
 import ssl
 import secrets 
 import hashlib
+import hmac
+
 
 '''
 Generate self-signed cert with the following command:
@@ -23,11 +25,8 @@ COOKIE_EXPIRATION = 60 * 60 			# amount of time for which a client auth cookie i
 CERT = './server.pem'					# the certificate for the ssl connection
 
 users = {}								# stores {username : {'password' : @password, 
-										# 					 'pwd_salt' : @pwd_salt,
-										# 					 'key_salt' : @key_salt}}
+										# 					 'pwd_salt' : @pwd_salt}
 										# pwd_salt is the salt for the hashed and salted password stored 
-										# key_salt is the salt users require to generate their secret key 
-										# from their password
 
 database = {}							# stores { username: @encrypted data of user }
 										# data of users are key-value pairs used to fill forms 
@@ -124,7 +123,7 @@ class S(BaseHTTPRequestHandler):
 		the server's secret key (@KEY)
 		'''
 		mac_msg = username + ":" + password + ":" + ts
-		return CryptUtils.mac(mac_msg, KEY)
+		return hmac.new(KEY, str.encode(mac_msg), hashlib.sha256).hexdigest() 
 
 	def modifyFields(self, username, post_data):
 		'''
@@ -151,8 +150,7 @@ class S(BaseHTTPRequestHandler):
 		Attempts to login to the system using the username and password
 		sent in @post_data. Salts and hashes the password sent to 
 		verify credentials. Send an auth cookie back with a token and timestamp 
-		for future verification of credentials. Also, sends the key_salt to
-		the client. 
+		for future verification of credentials. 
 		'''
 		try:
 			username = post_data["username"]
@@ -160,15 +158,12 @@ class S(BaseHTTPRequestHandler):
 			user = users[username]
 			pwd = user["password"]
 			salt = user["pwd_salt"]
-			password = CryptUtils.saltAndHash(salt, password)
+			password = self.saltAndHash(salt, password)
 			if (password == pwd):
-				key_salt = user["key_salt"]
 				ts = str(dt.datetime.now())
 				auth_token = self.genAuthToken(username, password, ts)
 				cookie = json.dumps({"AUTH" : auth_token, "TIMESTAMP" : ts})
 				self._set_headers(200, cookie=cookie)
-				self.wfile.write(("salt=" + key_salt).encode())
-				print(key_salt)
 				print(username + " has logged in")
 				return
 			else:
@@ -225,7 +220,7 @@ class S(BaseHTTPRequestHandler):
 		'''
 		return secrets.token_hex(16)
 
-	def saltAndHash(salt, pwd):
+	def saltAndHash(self, salt, pwd):
 		'''
 		Returns a hex value of the salted and hashed password 
 		'''
