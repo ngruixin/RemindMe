@@ -1,5 +1,6 @@
-SERVER_IP = ""
-SERVER_PORT = ""
+SERVER_IP = "127.0.0.1"
+SERVER_PORT = "8080" 
+HOST = "http://" + SERVER_IP + ":" + SERVER_PORT + "/"
 
 $(document).ready(function() {
 	
@@ -20,7 +21,7 @@ function register() {
 		return;
 	}
 	var post_data = JSON.stringify({"username": username, "password": password});
-	if (post(post_data)) window.location = "login.html"; 
+	if (post("register.html", post_data)) window.location = "login.html"; 
 	else alert("Registration failed, please try again.")
 }
 
@@ -28,7 +29,7 @@ function login() {
 	var username = $("#username").val();
 	var password = $("#password").val();
 	var post_data = JSON.stringify({"username": username, "password": password});
-	if (post(post_data)) window.location = "reminder.html"; 
+	if (post("login.html", post_data)) window.location = "reminder.html"; 
 	else alert("Login failed, please try again.")
 }
 
@@ -42,21 +43,26 @@ function save() {
     });
 }
 
-function post(post_data) {
+function post(uri, post_data) {
 	console.log(post_data);
+	console.log(HOST + uri);
+	$.ajax({
+	    url: HOST + uri,
+	    dataType: 'json',
+	    type: 'post',
+	    contentType: 'application/json',
+		data: post_data,
+		success: function( data, textStatus, jQxhr ){
+	        $('#response pre').html( JSON.stringify( data ) );
+	        return true;
+	    },
+	    error: function( jqXhr, textStatus, errorThrown ){
+	        console.log( errorThrown );
+	        return false;
+	    }
+	})
 	return true;
-	// ajax?? 
-	/*$.ajax({
-	  type: 'POST',
-	  url: form.attr('action'),
-	  data: form.serialize(), // serializes form elements
-	  success: function(response) {
-	    // re-writes the entire document
-	    var newDoc = document.open("text/html", "replace");
-	    newDoc.write(response);
-	    newDoc.close();
-	  }
-	});*/
+	//return false; #TODO SHOULD RETURN FALSE
 }
 
 
